@@ -5,12 +5,6 @@ $RED = "\033[31m";
 $GREEN = "\033[32m";
 $RESET = "\033[0m";
 
-echo "Inserisci la tua password:\n";
-$password = readline();
-
-// Array per raccogliere gli errori
-$errors = [];
-
 // 1. Lunghezza
 function checkLength($string, &$errors) {
     if (strlen($string) < 8) {
@@ -71,28 +65,42 @@ function checkNoSpaces($string, &$errors) {
     return true;
 }
 
-// Array di funzioni di controllo
-$checks = [
-    'checkLength',
-    'checkUpperCase',
-    'checkNumber',
-    'checkSymbol',
-    'checkNoSpaces'
-];
+// Funzione principale
+function validatePassword($password, &$errors) {
+    $errors = [];
 
-// Ciclo controlli
-$allValid = true;
-for ($i = 0; $i < count($checks); $i++) {
-    $result = $checks[$i]($password, $errors);
-    if (!$result) $allValid = false;
-}
+    $checks = [
+        'checkLength',
+        'checkUpperCase',
+        'checkNumber',
+        'checkSymbol',
+        'checkNoSpaces'
+    ];
 
-// Esito
-if ($allValid) {
-    echo "{$GREEN}✅ Password valida!{$RESET}\n";
-} else {
-    echo "{$RED}⚠️ Password non valida. Ecco gli errori rilevati:{$RESET}\n";
-    foreach ($errors as $error) {
-        echo "{$RED}- $error{$RESET}\n";
+    $allValid = true;
+    foreach ($checks as $check) {
+        if (!$check($password, $errors)) {
+            $allValid = false;
+        }
     }
+
+    return $allValid;
 }
+
+// Ciclo finché la password non è valida
+do {
+    echo "Inserisci la tua password:\n";
+    $password = readline();
+    $errors = [];
+
+    $isValid = validatePassword($password, $errors);
+
+    if (!$isValid) {
+        echo "{$RED}⚠️ Password non valida. Ecco gli errori rilevati:{$RESET}\n";
+        foreach ($errors as $error) {
+            echo "{$RED}- $error{$RESET}\n";
+        }
+    }
+} while (!$isValid);
+
+echo "{$GREEN}✅ Password valida!{$RESET}\n";
